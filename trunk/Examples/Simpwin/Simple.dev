@@ -1,0 +1,27 @@
+[Project]
+FileName=Simple.dev
+Name=Simple window
+Ver=1
+UnitCount=1
+Type=0
+Icon=Simple.ico
+Resources=
+ObjFiles=
+Includes=
+Libs=
+Compiler=
+Linker=
+IsCpp=0
+PrivateResource=Simple.rc
+ResourceIncludes=
+ExeOutput=
+ObjectOutput=
+
+[Unit1]
+FileName=Main.cpp
+Open=1
+Top=1
+
+[Views]
+ProjectView=1
+
