@@ -18,11 +18,11 @@ LDFLAGS = $(CFLAGS)
 
 TARGET = cygne
 
-OBJ = sdl/ddrawsdl.o sdl/filessdl.o sdl/mainsdl.o \
+OBJ = sdl/ddrawsdl.o sdl/filessdl.o sdl/mainsdl.o sdl/getparamsdl.o \
       gfx.o nec.o tcache.o memory.o \
       zlib/unzip.o
 
-LIBS = `sdl-config --libs` -lz
+LIBS = `sdl-config --libs` -lz -lstdc++
 
 all: $(TARGET)
 
