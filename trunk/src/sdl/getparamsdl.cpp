@@ -1,6 +1,7 @@
 /* C parser, I hope I understood how the conf format should be */
 
 #include "include/getparamsdl.h"
+#include "include/globals.h"
 #ifdef __QNX__
 #define __GCC_BUILTIN
 #undef __cplusplus
@@ -8,14 +9,15 @@
 #endif
 
 #ifndef C_PARSER
-#include <fstream>
-#include <string>
+#include <fstream.h>
+#include <string.h>
 
 int getparam(const char *file, const char *param)
 {
 	FILE *fin; // using FILE because gcc 2.95.3(BeOS) has big problems with fstream files.
 	int i;
 	char *need,*p;
+	char *s[5];
 	
 	fin = fopen(file, "rb");
 	if(fin==NULL) {
@@ -32,7 +34,7 @@ int getparam(const char *file, const char *param)
     i = ftell(fin);
     fseek(fin, 0, SEEK_SET);
 
-	p = malloc(sizeof(char)*(i+1));
+	p = (char *) malloc(sizeof(char)*(i+1));
 	p[i] = '\n';
 	
 	fread(p, i, 1, fin);
@@ -46,7 +48,7 @@ int getparam(const char *file, const char *param)
 		
 		need+=strlen(param)+1; 
 		
-		if(need != ´ ´) {
+		if(need != ' ') {
 		printf("error: no such parameter\n");	
 			return(-1);
 		}
@@ -58,7 +60,7 @@ int getparam(const char *file, const char *param)
 			return(-1);
 		}
 		
-		string s = need.substr(pos, pos2-pos);
+		s = need.substr(pos, pos2-pos);
 		
 		delete p;
 		fclose(fin);

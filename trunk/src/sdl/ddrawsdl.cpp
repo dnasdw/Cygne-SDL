@@ -11,7 +11,7 @@
  ===================================================================================
 */
 
-#include <SDL.h>
+#include <SDL/SDL.h>
 #include "include/globals.h"
 #include "include/gfx.h"
 
@@ -20,6 +20,7 @@
 #define k_s 29
 
 SDL_Surface *g_pDDSPrimary = NULL;
+SDL_Surface *g_pDDSBuffer  = NULL;
 
 DWORD						dx_bits,dx_pitch,cmov,dx_linewidth_blit,dx_buffer_line;
 DWORD						dx_r,dx_g,dx_b,dx_sr,dx_sg,dx_sb;
@@ -170,8 +171,154 @@ void closedx(void)
 	}
 }
 
-void UpdateFrame_h()
+__inline Uint32 getpixel(SDL_Surface *surface, int x, int y)
 {
+	int bpp = surface->format->BytesPerPixel;
+    /* Here p is the address to the pixel we want to retrieve */
+    Uint8 *p = (Uint8 *)surface->pixels + y * surface->pitch + x * bpp;
+
+    switch(bpp) {
+    case 1:
+        return *p;
+
+    case 2:
+        return *(Uint16 *)p;
+
+    case 3:
+        if(SDL_BYTEORDER == SDL_BIG_ENDIAN)
+            return p[0] << 16 | p[1] << 8 | p[2];
+        else
+            return p[0] | p[1] << 8 | p[2] << 16;
+
+    case 4:
+        return *(Uint32 *)p;
+
+    default:
+        return 0;
+    }
+}
+
+__inline void putpixel(SDL_Surface *surface, int x, int y, Uint32 pixel)
+{
+	int bpp = surface->format->BytesPerPixel;
+
+    Uint8 *p = (Uint8 *)surface->pixels + y * surface->pitch + x * bpp;
+
+    switch(bpp) {
+    case 1:
+        *p = pixel;
+        break;
+
+    case 2:
+        *(Uint16 *)p = pixel;
+        break;
+
+    case 3:
+        if(SDL_BYTEORDER == SDL_BIG_ENDIAN) {
+            p[0] = (pixel >> 16) & 0xff;
+            p[1] = (pixel >> 8) & 0xff;
+            p[2] = pixel & 0xff;
+        } else {
+            p[0] = pixel & 0xff;
+            p[1] = (pixel >> 8) & 0xff;
+            p[2] = (pixel >> 16) & 0xff;
+        }
+        break;
+
+    case 4:
+        *(Uint32 *)p = pixel;
+        break;
+    }
+}
+
+__inline void scaling( SDL_Surface *src, SDL_Surface *des, int width, int height, int size, int scanline )
+{
+    register int x=0,y=0, t1 = 0, t2 = 0;
+    Uint16 pixel;
+
+    if( (!scanline) && (size >= 2))
+    {
+	  for(y=0;y< (height); y++)
+	  {
+	     for(x=0;x<(width);x++)
+	     {
+			pixel = getpixel( src, x, y );
+            for( t1 = 0; t1 < size ; t1++)
+	        {
+		       for(t2=0; t2 < size ; t2++)
+		       {   
+                  putpixel( des, ((x*size) + t2) , ((y*size) + t1), pixel);
+               }
+            }
+	     }
+	  }
+    }
+    else if ( scanline )
+    {
+	  for(y=0;y< (height); y++)
+	  {
+	     for(x=0;x<(width);x++)
+	     {
+	     
+             pixel = getpixel( src, x, y );
+//		if ( Scanline_core == 1 ) 
+//		    putpixel( des, (x*size) , ( y*size) , pixel);
+//		else {
+		    
+		    for( t2=0; t2<size; t2++)
+		          putpixel( des, (x*size) + t2 , ( y*size) , pixel);
+//		}
+        	    
+	     }
+	  }
+    }
+
+}
+
+__inline void UpdateFrame_h()
+{
+    SDL_Rect area;
+
+    memcpy (g_pDDSBuffer->pixels, dx_buffer, g_pDDSBuffer->pitch*g_pDDSBuffer->h);
+
+	switch(fBlitterMode) {
+		case 1:
+	        SDL_BlitSurface( g_pDDSBuffer, NULL, g_pDDSPrimary, NULL);
+	        break;
+		case 2:
+		    scaling(g_pDDSBuffer, g_pDDSPrimary, 224, 144, 2, 1);
+		    break;
+		case 3:
+		    scaling(g_pDDSBuffer, g_pDDSPrimary, 224, 144, 2, 0 );
+		    break;
+	}
+
+	SDL_Flip(g_pDDSPrimary);
+}
+
+__inline void UpdateFrame_v()
+{
+
+    memcpy (g_pDDSBuffer->pixels, dx_buffer, g_pDDSBuffer->pitch*g_pDDSBuffer->h);
+
+	switch(fBlitterMode) {
+		case 1:
+	 	    SDL_BlitSurface( g_pDDSBuffer, NULL, g_pDDSPrimary, NULL);
+	 	    break;
+		case 2: // double scanlines
+		    scaling(g_pDDSBuffer, g_pDDSPrimary, 144, 224, 2, 1);
+		break;
+		case 3: // double stretch mode
+		    scaling(g_pDDSBuffer, g_pDDSPrimary, 144, 224, 2, 0 );
+		break;
+	}
+	
+	SDL_Flip(g_pDDSPrimary);
+}
+
+__inline void UpdateFrame_h_asm()
+{
+
 	switch(fBlitterMode) {
 		case 1:
 			__asm__ __volatile__(".align 32
@@ -239,183 +386,15 @@ void UpdateFrame_h()
 			: "S"(dx_buffer), "D"(g_pDDSPrimary->pixels), "c"(g_pDDSPrimary->pitch>>1), "d"(144));
 		break;
 	}
-	//Niels(adjust to suit) use the asm below, or use standard memcpy/fast_memcpy etc, updateframe_v is not implemented
-	// just do the same there SDL_Flip/memcpy shit
-	
-	//memcpy(g_pDDSPrimary->pixels, dx_buffer, g_pDDSPrimary->h * g_pDDSPrimary->pitch);
-	 //__asm__ __volatile__ ("emms
-//						  	
-//						    loop2:
-//						    movl %1, %%eax
-//						    movq (%0), %%mm0
-//						  	movq 8(%0), %%mm1
-//						   	movq 16(%0), %%mm2
-//						   	movq 24(%0), %%mm3
-//						  	movq %%mm0, (%1)
-//						   	movq %%mm1, 8(%1)
-//							movq %%mm2, 16(%1)
-//							movq %%mm3, 24(%1)
-//							leal 32(%1), %1
-//							leal 32(%0), %0 //1
-//							
-//						    movq (%0), %%mm0
-//						  	movq 8(%0), %%mm1
-//						   	movq 16(%0), %%mm2
-//						   	movq 24(%0), %%mm3
-//						  	movq %%mm0, (%1)
-//						   	movq %%mm1, 8(%1)
-//							movq %%mm2, 16(%1)
-//							movq %%mm3, 24(%1)
-//							leal 32(%1), %1
-//							leal 32(%0), %0 // 2
-//							
-//						    movq (%0), %%mm0
-//						  	movq 8(%0), %%mm1
-//						   	movq 16(%0), %%mm2
-//						   	movq 24(%0), %%mm3
-//						  	movq %%mm0, (%1)
-//						   	movq %%mm1, 8(%1)
-//							movq %%mm2, 16(%1)
-//							movq %%mm3, 24(%1)
-//							leal 32(%1), %1
-//							leal 32(%0), %0 // 3
-//							
-//						    movq (%0), %%mm0
-//						  	movq 8(%0), %%mm1
-//						   	movq 16(%0), %%mm2
-//						   	movq 24(%0), %%mm3
-//						  	movq %%mm0, (%1)
-//						   	movq %%mm1, 8(%1)
-//							movq %%mm2, 16(%1)
-//							movq %%mm3, 24(%1)
-//							leal 32(%1), %1
-//							leal 32(%0), %0  //4
-//							
-//						    movq (%0), %%mm0
-//						  	movq 8(%0), %%mm1
-//						   	movq 16(%0), %%mm2
-//						   	movq 24(%0), %%mm3
-//						  	movq %%mm0, (%1)
-//						   	movq %%mm1, 8(%1)
-//							movq %%mm2, 16(%1)
-//							movq %%mm3, 24(%1)
-//							leal 32(%1), %1
-//							leal 32(%0), %0  // 5
-//							
-//						    movq (%0), %%mm0
-//						  	movq 8(%0), %%mm1
-//						   	movq 16(%0), %%mm2
-//						   	movq 24(%0), %%mm3
-//						  	movq %%mm0, (%1)
-//						   	movq %%mm1, 8(%1)
-//							movq %%mm2, 16(%1)
-//							movq %%mm3, 24(%1)
-//							leal 32(%1), %1
-//							leal 32(%0), %0 // 6
-//							
-//						    movq (%0), %%mm0
-//						  	movq 8(%0), %%mm1
-//						   	movq 16(%0), %%mm2
-//						   	movq 24(%0), %%mm3
-//						  	movq %%mm0, (%1)
-//						   	movq %%mm1, 8(%1)
-//							movq %%mm2, 16(%1)
-//							movq %%mm3, 24(%1)
-//							leal 32(%1), %1
-//							leal 32(%0), %0 // 7
-//							
-//							movq (%0), %%mm0
-//						  	movq 8(%0), %%mm1
-//						   	movq 16(%0), %%mm2
-//						   	movq 24(%0), %%mm3
-//						  	movq %%mm0, (%1)
-//						   	movq %%mm1, 8(%1)
-//							movq %%mm2, 16(%1)
-//							movq %%mm3, 24(%1)
-//							leal 32(%1), %1
-//							leal 32(%0), %0 // 8
-//							
-//							movq (%0), %%mm0
-//						  	movq 8(%0), %%mm1
-//						   	movq 16(%0), %%mm2
-//						   	movq 24(%0), %%mm3
-//						  	movq %%mm0, (%1)
-//						   	movq %%mm1, 8(%1)
-//							movq %%mm2, 16(%1)
-//							movq %%mm3, 24(%1)
-//							leal 32(%1), %1
-//							leal 32(%0), %0 // 9
-//							
-//							movq (%0), %%mm0
-//						  	movq 8(%0), %%mm1
-//						   	movq 16(%0), %%mm2
-//						   	movq 24(%0), %%mm3
-//						  	movq %%mm0, (%1)
-//						   	movq %%mm1, 8(%1)
-//							movq %%mm2, 16(%1)
-//							movq %%mm3, 24(%1)
-//							leal 32(%1), %1
-//							leal 32(%0), %0 // 10
-//							
-//							movq (%0), %%mm0
-//						  	movq 8(%0), %%mm1
-//						   	movq 16(%0), %%mm2
-//						   	movq 24(%0), %%mm3
-//						  	movq %%mm0, (%1)
-//						   	movq %%mm1, 8(%1)
-//							movq %%mm2, 16(%1)
-//							movq %%mm3, 24(%1)
-//							leal 32(%1), %1
-//							leal 32(%0), %0 // 11
-//							
-//							movq (%0), %%mm0
-//						  	movq 8(%0), %%mm1
-//						   	movq 16(%0), %%mm2
-//						   	movq 24(%0), %%mm3
-//						  	movq %%mm0, (%1)
-//						   	movq %%mm1, 8(%1)
-//							movq %%mm2, 16(%1)
-//							movq %%mm3, 24(%1)
-//							leal 32(%1), %1
-//							leal 32(%0), %0 // 12
-//							
-//							movq (%0), %%mm0
-//						  	movq 8(%0), %%mm1
-//						   	movq 16(%0), %%mm2
-//						   	movq 24(%0), %%mm3
-//						  	movq %%mm0, (%1)
-//						   	movq %%mm1, 8(%1)
-//							movq %%mm2, 16(%1)
-//							movq %%mm3, 24(%1)
-//							leal 32(%1), %1
-//							leal 32(%0), %0 // 13
-//							
-//							movq (%0), %%mm0
-//						  	movq 8(%0), %%mm1
-//						   	movq 16(%0), %%mm2
-//						   	movq 24(%0), %%mm3
-//						  	movq %%mm0, (%1)
-//						   	movq %%mm1, 8(%1)
-//							movq %%mm2, 16(%1)
-//							movq %%mm3, 24(%1)
-//							
-//							leal 32(%0), %0
-//							movl %%eax, %1
-//							
-//							leal (%1, %3, 0), %1
-//							decl %%ecx
-//							jnz loop2
-//						   emms
-//						   
-//						   "
-//						:
-//						: "S"(dx_buffer), "D"(g_pDDSPrimary->pixels), "c"(144), "d"(dx_linewidth_blit));
 	
 	SDL_Flip(g_pDDSPrimary);
+
 }
 
-void UpdateFrame_v()
+
+__inline void UpdateFrame_v_asm()
 {
+
 	switch(fBlitterMode) {
 		case 1:
 			__asm__ __volatile__(".align 32
@@ -485,6 +464,10 @@ void UpdateFrame_v()
 	SDL_Flip(g_pDDSPrimary);
 }
 
+
+
+
+
 int start_dx_h(void)
 {
 	if(g_pDDSPrimary != NULL) {
@@ -492,19 +475,48 @@ int start_dx_h(void)
 		g_pDDSPrimary = NULL;
 	}
 		
-	g_pDDSPrimary = SDL_SetVideoMode(224 * fScreenSize, 144 * fScreenSize, 16, SDL_SWSURFACE);
+	if(g_pDDSBuffer != NULL) {
+		SDL_FreeSurface(g_pDDSBuffer);
+		g_pDDSBuffer = NULL;
+	}
+
+
+	g_pDDSPrimary = SDL_SetVideoMode(224 * fScreenSize, 144 * fScreenSize, 16, SDL_HWSURFACE | SDL_DOUBLEBUF);
+
+	g_pDDSBuffer  = SDL_CreateRGBSurface( SDL_SWSURFACE | SDL_SRCCOLORKEY | SDL_SRCALPHA, 	
+		    224, 
+			144, 
+            g_pDDSPrimary->format->BitsPerPixel,
+			g_pDDSPrimary->format->Rmask, 
+			g_pDDSPrimary->format->Gmask, 
+			g_pDDSPrimary->format->Bmask, 
+			g_pDDSPrimary->format->Amask );
+
+
 	memset(g_pDDSPrimary->pixels, 0, g_pDDSPrimary->pitch * g_pDDSPrimary->h);
+	memset(g_pDDSBuffer->pixels, 0, g_pDDSBuffer->pitch * g_pDDSBuffer->h);
 	
 	SDL_WM_SetCaption("Cygne/SDL", NULL);
+
 	if(!g_pDDSPrimary) {
 		puts("error");
 		return 1;
 	}
 	
-	dx_bits = g_pDDSPrimary->format->BitsPerPixel;
-	dx_r = g_pDDSPrimary->format->Rmask;
-	dx_g = g_pDDSPrimary->format->Gmask;
-	dx_b = g_pDDSPrimary->format->Bmask;
+	if(!g_pDDSBuffer) {
+		puts("error");
+		return 1;
+	}
+
+
+//	dx_bits = g_pDDSPrimary->format->BitsPerPixel;
+//	dx_r = g_pDDSPrimary->format->Rmask;
+//	dx_g = g_pDDSPrimary->format->Gmask;
+//	dx_b = g_pDDSPrimary->format->Bmask;
+	dx_bits = g_pDDSBuffer->format->BitsPerPixel;
+	dx_r = g_pDDSBuffer->format->Rmask;
+	dx_g = g_pDDSBuffer->format->Gmask;
+	dx_b = g_pDDSBuffer->format->Bmask;
 	
 	//if(g_pDDScanner != NULL) {
 	//	SDL_FreeSurface(g_pDDScanner);
@@ -516,8 +528,10 @@ int start_dx_h(void)
 	//						16, dx_r, dx_g, dx_b, 0);
 		
 	
-	dx_pitch=g_pDDSPrimary->pitch;
-	cmov=g_pDDSPrimary->pitch/4;
+//	dx_pitch=g_pDDSPrimary->pitch;
+//	cmov=g_pDDSPrimary->pitch/4;
+	dx_pitch=g_pDDSBuffer->pitch;
+	cmov=g_pDDSBuffer->pitch/4;
 	dx_bits/=8;
 	dx_sr=find1(dx_r);
 	dx_sg=find1(dx_g);
@@ -532,7 +546,8 @@ int start_dx_h(void)
 	dx_g=count1(dx_g);
 	dx_b=count1(dx_b);
 	
-	dx_linewidth_blit=g_pDDSPrimary->pitch;
+//	dx_linewidth_blit=g_pDDSPrimary->pitch;
+	dx_linewidth_blit=g_pDDSBuffer->pitch;
 	dx_buffer_line=61*dx_bits;
 	set_shades();
 	return	0;
@@ -545,22 +560,44 @@ int start_dx_v(void)
 		g_pDDSPrimary = NULL;
 	}
 	
-	g_pDDSPrimary = SDL_SetVideoMode(144*fScreenSize, 224*fScreenSize, 16, SDL_SWSURFACE);
+	if(g_pDDSBuffer  != NULL) {
+		SDL_FreeSurface(g_pDDSBuffer);
+		g_pDDSBuffer = NULL;
+	}
+
+
+	g_pDDSPrimary = SDL_SetVideoMode(144*fScreenSize, 224*fScreenSize, 16, SDL_HWSURFACE | SDL_DOUBLEBUF);
+	
+	g_pDDSBuffer  = SDL_CreateRGBSurface( SDL_SWSURFACE | SDL_SRCCOLORKEY | SDL_SRCALPHA, 	
+		    144, 
+			224, 
+            g_pDDSPrimary->format->BitsPerPixel,
+			g_pDDSPrimary->format->Rmask, 
+			g_pDDSPrimary->format->Gmask, 
+			g_pDDSPrimary->format->Bmask, 
+			g_pDDSPrimary->format->Amask );
 	
 	memset(g_pDDSPrimary->pixels, 0, g_pDDSPrimary->pitch * g_pDDSPrimary->h);
+	memset(g_pDDSBuffer->pixels, 0, g_pDDSBuffer->pitch * g_pDDSBuffer->h);
+	
 	SDL_WM_SetCaption("Cygne/SDL", NULL);
 	if(!g_pDDSPrimary) {
 		puts("Error setting SDL framebuffer\n");
 		return 1;
 	}
 
-	dx_bits = g_pDDSPrimary->format->BitsPerPixel;
-	dx_r = g_pDDSPrimary->format->Rmask;
-	dx_g = g_pDDSPrimary->format->Gmask;
-	dx_b = g_pDDSPrimary->format->Bmask;
+	if(!g_pDDSBuffer) {
+		puts("Error setting SDL Buffer\n");
+		return 1;
+	}
+
+	dx_bits = g_pDDSBuffer->format->BitsPerPixel;
+	dx_r = g_pDDSBuffer->format->Rmask;
+	dx_g = g_pDDSBuffer->format->Gmask;
+	dx_b = g_pDDSBuffer->format->Bmask;
 	
-	dx_pitch=g_pDDSPrimary->pitch;
-	cmov=g_pDDSPrimary->pitch/4;
+	dx_pitch=g_pDDSBuffer->pitch;
+	cmov=g_pDDSBuffer->pitch/4;
 	dx_bits/=8;
 	dx_sr=find1(dx_r);
 	dx_sg=find1(dx_g);
@@ -573,7 +610,7 @@ int start_dx_v(void)
 	dx_r=count1(dx_r);
 	dx_g=count1(dx_g);
 	dx_b=count1(dx_b);
-	dx_linewidth_blit=g_pDDSPrimary->pitch;
+	dx_linewidth_blit=g_pDDSBuffer->pitch;
 	dx_buffer_line=61*dx_bits;
 	set_shades();
 	return 0;

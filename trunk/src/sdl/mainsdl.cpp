@@ -12,14 +12,15 @@
 #ifdef __QNX__ 
 #define  __GCC_BUILTIN
 #endif
-#include <SDL.h>
-#include "include/Usage.h"
+#include <SDL/SDL.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <math.h>
+
+#include "include/Usage.h"
 #include "include/globals.h"
 #include "include/gfx.h"
 #include "include/memory.h"
@@ -59,6 +60,7 @@ DWORD k_up2i, k_down2i, k_left2i, k_right2i, k_ai, k_bi, k_starti, k_flipi, link
 
 void init_param()
 {
+
 	int j; 
 	for(j = 0; j < 11; j++) {
 		keydef[j] = getparam("cygne.cfg", keyparam[j]);
@@ -86,6 +88,8 @@ void init_param()
 		fScreenSize = 2;
 		fBlitterMode = 2;
 	}
+	
+
 }
 
 void wsReset(void)
