@@ -8,7 +8,7 @@
 
  ===================================================================================
 */
-
+#include "include/getparamsdl.h"
 #include <SDL.h>
 #include "include/Usage.h"
 #include <stdlib.h>
@@ -23,7 +23,12 @@
 #include "include/start.h"
 
 // defines for cygne SDL 
-bool exiting = false; /*are we running ?*/
+static int keydef[12];
+static int joydef[4];
+static bool exiting = false; /*are we running ?*/
+static int fUseJoy = -1;
+static int fUseDouble = -1;
+static int fUseScanlines = -1;
 long fBlitterMode = 0; /*Blit Mode*/
 long fScreenSize = 1; /*Screen Scale*/
 const char *fArgvFile;		/*argv file for SDL*/
@@ -44,6 +49,37 @@ BYTE 		vsync;
 
 DWORD k_up1, k_down1, k_left1, k_right1, k_up2, k_down2, k_left2, k_right2, k_a, k_b, k_start, k_up1i, k_down1i, k_left1i, k_right1i;
 DWORD k_up2i, k_down2i, k_left2i, k_right2i, k_ai, k_bi, k_starti, k_flipi, link_controls;
+
+void init_param()
+{
+	int j; 
+	for(j = 0; j < 11; j++) {
+		keydef[j] = getparam("cygne.cfg", keyparam[j]);
+	}
+	
+	for(j = 0; j < 3; j++) {
+		joydef[j] = getparam("cygne.cfg", joyparam[j]);
+	}
+	
+	fUseJoy = getparam("cygne.cfg", "cygne_joy_enabled");
+	fUseDouble = getparam("cygne.cfg", "cygne_screen_double");
+	fUseScanlines = getparam("cygne.cfg", "cygne_screen_scanlines");
+	
+	if(fUseDouble == 1 && fUseScanlines == 1) {
+		puts("Scanlines and Double mode are enabled in config file, using default of scanline mode");
+		fUseScanlines = -1;
+	}
+	
+	if(fUseDouble) {
+		fScreenSize = 2;
+		fBlitterMode = 3;
+	}
+	
+	if(fUseScanlines) {
+		fScreenSize = 2;
+		fBlitterMode = 2;
+	}
+}
 
 void wsReset(void)
 {
@@ -164,6 +200,15 @@ void CheckKeys()
 		case SDL_KEYUP:
 			KeyUp(ev.key.keysym.sym);
 		break;
+		case SDL_JOYBUTTONDOWN:
+			JoyButtonDown(ev.jbutton.button);
+		break;
+		case SDL_JOYBUTTONUP:
+			JoyButtonUp(ev.jbutton.button);
+		break;
+		case SDL_JOYAXISMOTION:
+			JoyMotion(ev.jaxis.axis, ev.jaxis.value);
+		break;
 		case SDL_QUIT:
 			exiting = true;
 		break;
@@ -171,12 +216,51 @@ void CheckKeys()
 	}
 }
 
-//
+void JoyMotion(unsigned long axis, long value)
+{
+	switch(axis) {
+		case 0:
+			value <= -16384 ? k_left1 = 1 : k_left1 = 0;
+			value >= 16384 ? k_right1 = 1 : k_right1 = 0;
+		break;
+		case 1:
+			value <= -16384 ? k_up1 = 1 : k_up1 = 0;
+			value >= 16384 ? k_down1 = 1 : k_down1 = 0;
+		default:
+		break;
+	}
+}
+
+void JoyButtonDown(unsigned long jbutton)
+{
+	if(jbutton == joydef[JOY_START]) k_start = 1;
+	if(jbutton == joydef[JOY_A]) k_a = 1;
+	if(jbutton == joydef[JOY_B]) k_b = 1;
+}
+
+void JoyButtonUp(unsigned long jbutton)
+{
+	if(jbutton == joydef[JOY_START]) k_start = 0;
+	if(jbutton == joydef[JOY_A]) k_a = 0;
+	if(jbutton == joydef[JOY_B]) k_b = 0;
+}
 
 void KeyDown(unsigned long key)
 {
 	char ttt[256];
-	
+	if(key == keydef[CYGNE_UP1]) k_up1 = 1;
+	if(key == keydef[CYGNE_DOWN1]) k_down1 = 1;
+	if(key == keydef[CYGNE_LEFT1]) k_left1 = 1;
+	if(key == keydef[CYGNE_RIGHT1]) k_right1 = 1;
+		
+	if(key == keydef[CYGNE_UP2]) k_up2 = 1;
+	if(key == keydef[CYGNE_DOWN2]) k_down2 = 1;
+	if(key == keydef[CYGNE_LEFT2]) k_left2 = 1;
+	if(key == keydef[CYGNE_RIGHT2]) k_right2 = 1;
+		
+	if(key == keydef[CYGNE_START]) k_start = 1;
+	if(key == keydef[CYGNE_A]) k_a = 1;
+	if(key == keydef[CYGNE_B]) k_b = 1;
 	switch(key) 
 	{
 		case SDLK_1:
@@ -190,39 +274,6 @@ void KeyDown(unsigned long key)
 		break;
 		case SDLK_4:
 			cycles_line=677; sprintf(ttt, "Cycles/line -> 677"); SDL_WM_SetCaption(ttt, "Cygne");
-		break;
-		case SDLK_LEFT:
-			k_left1=1;
-		break;
-		case SDLK_RIGHT:
-			k_right1=1;
-		break;
-		case SDLK_UP:
-			k_up1=1;
-		break;
-		case SDLK_DOWN:
-			k_down1=1;
-		break;
-		case SDLK_a:
-			k_left2=1;
-		break;
-		case SDLK_d:
-			k_right2=1;
-		break;
-		case SDLK_w:
-			k_up2=1;
-		break;
-		case SDLK_s:
-			k_down2=1;
-		break;
-		case SDLK_z:
-			k_a=1;
-		break;
-		case SDLK_x:
-			k_b=1;
-		break;
-		case SDLK_SPACE:
-			k_start=1;
 		break;
 		case SDLK_TAB:
 			flip_screen();
@@ -240,7 +291,21 @@ void KeyDown(unsigned long key)
 
 void KeyUp(unsigned long key)
 {
-	switch(key) //Niels(adjust to suit) these keys can be used as GetVal jobs if you wanted, for config
+	if(key == keydef[CYGNE_UP1]) k_up1 = 0;
+	if(key == keydef[CYGNE_DOWN1]) k_down1 = 0;
+	if(key == keydef[CYGNE_LEFT1]) k_left1 = 0;
+	if(key == keydef[CYGNE_RIGHT1]) k_right1 = 0;
+		
+	if(key == keydef[CYGNE_UP2]) k_up2 = 0;
+	if(key == keydef[CYGNE_DOWN2]) k_down2 = 0;
+	if(key == keydef[CYGNE_LEFT2]) k_left2 = 0;
+	if(key == keydef[CYGNE_RIGHT2]) k_right2 = 0;
+		
+	if(key == keydef[CYGNE_START]) k_start = 0;
+	if(key == keydef[CYGNE_A]) k_a = 0;
+	if(key == keydef[CYGNE_B]) k_b = 0;
+	
+	switch(key)
 	{
 		case SDLK_1:
 			SDL_Delay(500);
@@ -257,39 +322,6 @@ void KeyUp(unsigned long key)
 		case SDLK_4:
 			SDL_Delay(500);
 			SDL_WM_SetCaption("Cygne", NULL);
-		break;
-		case SDLK_LEFT:
-			k_left1=0;
-		break;
-		case SDLK_RIGHT:
-			k_right1=0;
-		break;
-		case SDLK_UP:
-			k_up1=0;
-		break;
-		case SDLK_DOWN:
-			k_down1=0;
-		break;
-		case SDLK_a:
-			k_left2=0;
-		break;
-		case SDLK_d:
-			k_right2=0;
-		break;
-		case SDLK_w:
-			k_up2=0;
-		break;
-		case SDLK_s:
-			k_down2=0;
-		break;
-		case SDLK_z:
-			k_a=0;
-		break;
-		case SDLK_x:
-			k_b=0;
-		break;
-		case SDLK_SPACE:
-			k_start=0;
 		break;
 		default:
 		break;
@@ -318,7 +350,10 @@ int main(int argc, char *argv[])
 	vsync=1;
 	fScreenSize = 1;
 	fBlitterMode = 1;
-
+	static SDL_Joystick *stick;
+	
+	init_param();
+	
 	for (i=0; (i < argc || argv[i] != NULL); i++) {
 		
 		if(strcmp(argv[i], "-double") == 0) {
@@ -331,18 +366,21 @@ int main(int argc, char *argv[])
 			fBlitterMode = 2;
 		}
 		
+		if(strcmp(argv[i], "-joystick") == 0) {
+			fUseJoy = 1;
+		}
+		
 		if (strncmp(argv[i], "-h", 2) == 0) {
 			Usage();
 			exit(0);
 		}
 	}
 	
-	
 	fArgvFile = strdup(argv[1]);
 	in = fopen(fArgvFile, "rb");
 	
 	if(in == NULL) {
-		printf("The file %s doesn't exist.\n",argv[1]);
+		printf("The file %s doesn't exist.\n", argv[1]);
 		exit(0);
 	}
 	fflush(in);
@@ -357,6 +395,15 @@ int main(int argc, char *argv[])
 		return(1);
 	}
 	
+	if(fUseJoy) {
+		printf("There are %d joysticks attached\n", SDL_NumJoysticks());
+		printf("joystick(0) is: %s\n", SDL_JoystickName(0));
+		stick = SDL_JoystickOpen(0);
+		if (stick == NULL) {
+			printf("Couldn't open joystick %d: %s\n", 0, SDL_GetError());
+		}
+	}
+
 	start_dx();
 	set_shades();
 	f_load=TRUE;
@@ -369,7 +416,7 @@ int main(int argc, char *argv[])
 	SDL_Delay(100);
 	closedx();
 	
-	SDL_QuitSubSystem(SDL_INIT_VIDEO|SDL_INIT_JOYSTICK|SDL_INIT_AUDIO|SDL_INIT_TIMER);
+	SDL_QuitSubSystem(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_AUDIO | SDL_INIT_TIMER);
 
 	SDL_Quit();
 	return(0);
