@@ -1,5 +1,12 @@
+/* C parser, I hope I understood how the conf format should be */
+
 #include "include/getparamsdl.h"
+#ifdef __QNX__
+#define __GCC_BUILTIN
+#undef __cplusplus
 #define C_PARSER
+#endif
+
 #ifndef C_PARSER
 #include <fstream>
 #include <string>
@@ -8,16 +15,16 @@ int getparam(const char *file, const char *param)
 {
 	FILE *fin; // using FILE because gcc 2.95.3(BeOS) has big problems with fstream files.
 	int i;
-	string need;
+	char *need,*p;
 	
 	fin = fopen(file, "rb");
-	if(!fin) {
-		cout << "error: " << file << " does not exist" << endl;
+	if(fin==NULL) {
+		printf("error: %s does not exist \n", file);
 		return(-1);
 	}
 	
 	if(param == NULL) {
-		cout << "error: invalid parameter" << endl;
+		printf("error: invalid parameter\n");
 		return(-1);
 	}
 	
@@ -25,35 +32,26 @@ int getparam(const char *file, const char *param)
     i = ftell(fin);
     fseek(fin, 0, SEEK_SET);
 
-	char *p = new char[i+1];
+	p = malloc(sizeof(char)*(i+1));
 	p[i] = '\n';
 	
 	fread(p, i, 1, fin);
-	
-	need = p;
-	
-	string::size_type findpos = need.find(param);
+			
+		need = strstr(p,param);
 		
-		if(findpos == string::npos) {
-			cout << "error: no such parameter" << endl;
+		if(need == NULL) {
+		printf("error: no such parameter\n");
 			return(-1);
 		}
 		
-		string::size_type lastPos = need.find_first_not_of(" ", findpos); 
+		need+=strlen(param)+1; 
 		
-		if(lastPos == string::npos) {
-			cout << "error: no such delimiter" << endl;
+		if(need != ´ ´) {
+		printf("error: no such parameter\n");	
 			return(-1);
 		}
 		
-		string::size_type pos = need.find_first_of(" ", lastPos);
 		
-		if(pos == string::npos) {
-			cout << "error: no such delimiter" << endl;
-			return(-1);
-		}
-		
-		string::size_type pos2 = need.find_first_of("\n", pos);
 		
 		if(pos2 == string::npos) {
 			cout << "error: no such delimiter" << endl;
@@ -133,5 +131,12 @@ int getparam(const char *file, const char *param)
 	if (i>4) return (-1);
 	return (atoi(buf));
 }
+
+void freeparam(void)
+{
+if (cfgfile!=NULL)
+free(cfgfile);
+}
+
 }
 #endif

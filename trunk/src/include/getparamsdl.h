@@ -2,8 +2,9 @@
 #define __GET_PARAM_H__
 
 #include <stdio.h>
-
+extern "C"  {
 int getparam(const char *file, const char *param);
+void freeparam(void);
 
 static char *keyparam[] = {
 	"cygne_up1",
@@ -19,7 +20,7 @@ static char *keyparam[] = {
 	"cygne_b",
 	NULL
 };
-
+}
 static char *joyparam[] = {
 	"cygne_joy_start",
 	"cygne_joy_a",

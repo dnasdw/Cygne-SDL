@@ -10,6 +10,9 @@
 */
 
 #ifdef __SDL__
+#ifdef __QNX__
+#define __GCC_BUILTIN
+#endif
 #include <string.h> // memset
 typedef unsigned long DWORD;
 typedef unsigned short WORD;
