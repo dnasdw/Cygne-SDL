@@ -191,34 +191,6 @@ void wsExecuteLine()
 	}
 }
 
-void CheckKeys()
-{
-	SDL_Event ev;
-	while(SDL_PollEvent(&ev))
-	{
-		switch(ev.type)
-		{
-		case SDL_KEYDOWN:
-			KeyDown(ev.key.keysym.sym);
-		break;
-		case SDL_KEYUP:
-			KeyUp(ev.key.keysym.sym);
-		break;
-		case SDL_JOYBUTTONDOWN:
-			JoyButtonDown(ev.jbutton.button);
-		break;
-		case SDL_JOYBUTTONUP:
-			JoyButtonUp(ev.jbutton.button);
-		break;
-		case SDL_JOYAXISMOTION:
-			JoyMotion(ev.jaxis.axis, ev.jaxis.value);
-		break;
-		case SDL_QUIT:
-			exiting = true;
-		break;
-		}
-	}
-}
 
 void JoyMotion(unsigned long axis, long value)
 {
@@ -335,6 +307,38 @@ void KeyUp(unsigned long key)
 		break;
 	}
 }
+
+void CheckKeys()
+{
+	SDL_Event ev;
+	while(SDL_PollEvent(&ev))
+	{
+		switch(ev.type)
+		{
+		case SDL_KEYDOWN:
+			KeyDown(ev.key.keysym.sym);
+		break;
+		case SDL_KEYUP:
+			KeyUp(ev.key.keysym.sym);
+		break;
+		case SDL_JOYBUTTONDOWN:
+			JoyButtonDown(ev.jbutton.button);
+		break;
+		case SDL_JOYBUTTONUP:
+			JoyButtonUp(ev.jbutton.button);
+		break;
+		case SDL_JOYAXISMOTION:
+			JoyMotion(ev.jaxis.axis, ev.jaxis.value);
+		break;
+		case SDL_QUIT:
+			exiting = true;
+		break;
+		}
+	}
+}
+
+
+
 
 // Our Cygne-main function.
 int main(int argc, char *argv[])
