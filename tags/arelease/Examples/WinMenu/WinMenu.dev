@@ -1,0 +1,21 @@
+[Project]
+Ver=1
+FileName=WinMenu.dev
+Name=Windows example
+IsCpp=1
+UnitCount=2
+Resources=rsrc.rc
+Type=0
+Icon=..\Icons\Mainicon.ico
+ObjFiles=
+Includes=
+Libs=
+Compiler=
+Linker=
+
+[Unit1]
+FileName=main.h
+
+[Unit2]
+FileName=main.cpp
+

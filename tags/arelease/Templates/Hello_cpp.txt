@@ -1,0 +1,14 @@
+#include <windows.h>
+#include <iostream.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+int
+main (int argc, char *argv[])
+{
+  cout << "Hello World!" << endl;
+
+  cout << "Press ENTER to continue..." << endl;
+  getchar ();
+  return 0;
+}

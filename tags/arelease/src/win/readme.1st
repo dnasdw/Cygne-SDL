@@ -1,0 +1,12 @@
+This directory in the CVS and/or sourcetree is from the original WIN32 version
+of Cygne. These files are included for history reasons as well as for 
+Development reasons. This version will probably not compile or import correct
+with Microsoft Visual C++. Be sure to do some hacking first.
+
+People who want to create a native WIN32 version of Cygne/SDL should use the
+makefile Makefile.win32 in conjunction with mingw32. 
+
+Mingw32 is a free GNU C/C++ compiler for WIN32 systems. For more information
+on mingw32, please visit http://www.mingw.org.
+
+SDLemu crew
