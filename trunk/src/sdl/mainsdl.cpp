@@ -22,6 +22,10 @@
 #include "include/memory.h"
 #include "include/start.h"
 
+// Main include file for Cygne/SDL. Make sure you put the
+// #defines and globals in here!
+#include "include/mainsdl.h"
+
 // defines for cygne SDL 
 static int keydef[12];
 static int joydef[4];
@@ -245,6 +249,8 @@ void JoyButtonUp(unsigned long jbutton)
 	if(jbutton == joydef[JOY_B]) k_b = 0;
 }
 
+// Wonderswan Key press function.
+// Additional keys must be set in KeyUp!
 void KeyDown(unsigned long key)
 {
 	char ttt[256];
@@ -289,6 +295,8 @@ void KeyDown(unsigned long key)
 	}
 }
 
+// Wonderswan Key release function.
+// Additional keys must be set in KeyDown!
 void KeyUp(unsigned long key)
 {
 	if(key == keydef[CYGNE_UP1]) k_up1 = 0;
@@ -328,6 +336,7 @@ void KeyUp(unsigned long key)
 	}
 }
 
+// Our Cygne-main function.
 int main(int argc, char *argv[])
 {
 	if(argc <= 1) {
@@ -351,6 +360,11 @@ int main(int argc, char *argv[])
 	fScreenSize = 1;
 	fBlitterMode = 1;
 	static SDL_Joystick *stick;
+    int joyport = 0;
+
+    printf("%s\nThe free and OpenSource Bandai Wonderswan Colour emulator.\n", VERSIONINTERNAL);
+    printf("Based upon the source tree off %s.\n", VERSION);
+    printf("This emulator is released under the GPL license. Read LICENSE for details\n");
 	
 	init_param();
 	
@@ -368,6 +382,13 @@ int main(int argc, char *argv[])
 		
 		if(strcmp(argv[i], "-joystick") == 0) {
 			fUseJoy = 1;
+		}
+        
+        // Joystick/Gamepad port selection upto 4 ports can be used.
+		if(strcmp(argv[i], "-joyport") == 0) {
+			fUseJoy = 1;
+            joyport = atoi(argv[++i]);
+            if (joyport > 3) joyport = 3; // Make sure we don't get above the 4th port.
 		}
 		
 		if (strncmp(argv[i], "-h", 2) == 0) {
@@ -397,8 +418,8 @@ int main(int argc, char *argv[])
 	
 	if(fUseJoy) {
 		printf("There are %d joysticks attached\n", SDL_NumJoysticks());
-		printf("joystick(0) is: %s\n", SDL_JoystickName(0));
-		stick = SDL_JoystickOpen(0);
+		printf("joystick(%d) is: %s\n", joyport, SDL_JoystickName(joyport)); // Get info from given Joystick at port
+		stick = SDL_JoystickOpen(joyport); // Open the joystick port
 		if (stick == NULL) {
 			printf("Couldn't open joystick %d: %s\n", 0, SDL_GetError());
 		}
