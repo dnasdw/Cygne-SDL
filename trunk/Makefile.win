@@ -1,0 +1,90 @@
+# Project: Cygne-SDL
+# Makefile created by Dev-C++ 4.9.7.0
+
+CPP  = g++.exe
+CC   = gcc.exe
+WINDRES = windres.exe
+RES  = 
+OBJ  = src/tcache.o src/memory.o src/nec.o src/gfx.o src/sdl/mainsdl.o src/sdl/filessdl.o src/sdl/getparamsdl.o src/sdl/ddrawsdl.o src/zlib/unzip.o src/zlib/compress.o src/zlib/crc32.o src/zlib/deflate.o src/zlib/infblock.o src/zlib/infcodes.o src/zlib/inffast.o src/zlib/inflate.o src/zlib/inftrees.o src/zlib/infutil.o src/zlib/trees.o src/zlib/uncompr.o src/zlib/zutil.o src/zlib/adler32.o $(RES)
+LIBS =  -L"C:/MinGW-3.2/lib" -L"C:/msys/1.0/local/lib" -lmingw32 -lSDLmain -lSDL -lstdc++
+INCS =  -I"C:/MinGW-3.2/include"  -I"C:/msys/1.0/local/include"  -I"C:/msys/1.0/home/nwa01/projects/Cygne-SDL/src" 
+BIN  = Cygne-SDL.exe
+CXXFLAGS = $(INCS) -DTARGET_WIN32 -D__SDL__ -DC_PARSER -O2
+CFLAGS = $(INCS) -DTARGET_WIN32 -D__SDL__ -DC_PARSER -O2
+
+.PHONY: all all-before all-after clean clean-custom
+
+all: all-before Cygne-SDL.exe all-after
+
+
+clean: clean-custom
+	rm -f $(OBJ) $(BIN)
+
+$(BIN): $(OBJ)
+	$(CC) $(OBJ) -o "Cygne-SDL.exe" $(LIBS) $(CFLAGS)
+
+src/tcache.o: src/tcache.cpp
+	$(CC) -c src/tcache.cpp -o src/tcache.o $(CFLAGS)
+
+src/memory.o: src/memory.cpp
+	$(CC) -c src/memory.cpp -o src/memory.o $(CFLAGS)
+
+src/nec.o: src/nec.cpp
+	$(CC) -c src/nec.cpp -o src/nec.o $(CFLAGS)
+
+src/gfx.o: src/gfx.cpp
+	$(CC) -c src/gfx.cpp -o src/gfx.o $(CFLAGS)
+
+src/sdl/mainsdl.o: src/sdl/mainsdl.cpp
+	$(CC) -c src/sdl/mainsdl.cpp -o src/sdl/mainsdl.o $(CFLAGS)
+
+src/sdl/filessdl.o: src/sdl/filessdl.cpp
+	$(CC) -c src/sdl/filessdl.cpp -o src/sdl/filessdl.o $(CFLAGS)
+
+src/sdl/getparamsdl.o: src/sdl/getparamsdl.cpp
+	$(CC) -c src/sdl/getparamsdl.cpp -o src/sdl/getparamsdl.o $(CFLAGS)
+
+src/sdl/ddrawsdl.o: src/sdl/ddrawsdl.cpp
+	$(CC) -c src/sdl/ddrawsdl.cpp -o src/sdl/ddrawsdl.o $(CFLAGS)
+
+src/zlib/unzip.o: src/zlib/unzip.c
+	$(CC) -c src/zlib/unzip.c -o src/zlib/unzip.o $(CFLAGS)
+
+src/zlib/compress.o: src/zlib/compress.c
+	$(CC) -c src/zlib/compress.c -o src/zlib/compress.o $(CFLAGS)
+
+src/zlib/crc32.o: src/zlib/crc32.c
+	$(CC) -c src/zlib/crc32.c -o src/zlib/crc32.o $(CFLAGS)
+
+src/zlib/deflate.o: src/zlib/deflate.c
+	$(CC) -c src/zlib/deflate.c -o src/zlib/deflate.o $(CFLAGS)
+
+src/zlib/infblock.o: src/zlib/infblock.c
+	$(CC) -c src/zlib/infblock.c -o src/zlib/infblock.o $(CFLAGS)
+
+src/zlib/infcodes.o: src/zlib/infcodes.c
+	$(CC) -c src/zlib/infcodes.c -o src/zlib/infcodes.o $(CFLAGS)
+
+src/zlib/inffast.o: src/zlib/inffast.c
+	$(CC) -c src/zlib/inffast.c -o src/zlib/inffast.o $(CFLAGS)
+
+src/zlib/inflate.o: src/zlib/inflate.c
+	$(CC) -c src/zlib/inflate.c -o src/zlib/inflate.o $(CFLAGS)
+
+src/zlib/inftrees.o: src/zlib/inftrees.c
+	$(CC) -c src/zlib/inftrees.c -o src/zlib/inftrees.o $(CFLAGS)
+
+src/zlib/infutil.o: src/zlib/infutil.c
+	$(CC) -c src/zlib/infutil.c -o src/zlib/infutil.o $(CFLAGS)
+
+src/zlib/trees.o: src/zlib/trees.c
+	$(CC) -c src/zlib/trees.c -o src/zlib/trees.o $(CFLAGS)
+
+src/zlib/uncompr.o: src/zlib/uncompr.c
+	$(CC) -c src/zlib/uncompr.c -o src/zlib/uncompr.o $(CFLAGS)
+
+src/zlib/zutil.o: src/zlib/zutil.c
+	$(CC) -c src/zlib/zutil.c -o src/zlib/zutil.o $(CFLAGS)
+
+src/zlib/adler32.o: src/zlib/adler32.c
+	$(CC) -c src/zlib/adler32.c -o src/zlib/adler32.o $(CFLAGS)
