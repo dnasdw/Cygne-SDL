@@ -1,6 +1,16 @@
 
 This is a list of changes in Cygne/SDL version history.
 
+version 0.2-CVS:
+
+- 2nd release, several cleanups in code and remove of comments;
+- Added SDL scaling/scanline routines;
+- Added SDL backbuffer for initial OpenGL/YUV rendering code;
+- ...
+
+
+
+
 Version 0.1:
 
 - Initial release, Cygne emulation core ported for use with GCC and SDL;

@@ -27,6 +27,10 @@ GCC and GNU Make. Copy the desired Makefile.systemname to the /src directory
 and rename it to Makefile. First edit the Makefile with your favorite editor
 to set some libraries and includes correctly (read the comment!).
 
+Besides a Makefile, you can also find a Cygne-SDL.dev file. This is a Dev C++
+development suite project file (available for Linux and WIN32) and can be used
+to compile Cygne/SDL using Dev C++.
+
 3. Compilation.
 
 After changing the Makefile with the correct settings, simply type the follwing
