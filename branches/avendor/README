@@ -1,0 +1,191 @@
+Cygne/SDL, the free Bandai Wonderswan (Colour) emulator README V1.0
+    (c) 2002 Niels Wagenaar and Carwyn Jones <sdlemu@ngemu.com>
+-------------------------------------------------------------------
+
+Authors:
+Emulator Core:
+Dox dox@space.pl http://cygne.emuunlim.com
+
+Windows Version:
+Dox dox@space.pl http://cygne.emuunlim.com
+
+Nec Cpu Core:
+Bryan McPhail, Oliver Bergmann, Fabrice Frances and David Hedley
+
+SDL Version:
+Carwyn Jones, turok2@currantbun.com
+Niels Wagenaar, niels@nwagenaar.demon.nl http://sdlemu.ngemu.com
+
+DISCLAIMER:
+
+The use of this software is entirely at your own risk. The developers can't be
+held responsible for damage done to your hard- and/or software.
+
+This emulator requires ROM images for use. The use of ROM images from commercial
+Wonderswan (Colour) games are allowed as long as you own the original cartridge.
+The use of pirated or illegally obtained ROM's is prohibited and is a act of
+piracy and illegal by law in certain countries. WE DO NOT SUPPORT PIRACY.
+
+
+1. What is Cygne/SDL?
+
+Originally Cygne was developed by Dox as a Bandai Wonderswan (Colour) emulator
+for Windows systems. From version 2.1 Dox decided to release the Windows sources
+to the public in GPL form which allows others to use the source and hack it :)
+
+Cygne/SDL is a Cygne port using the Simple Directmedia Layer (SDL) library which
+is available at http://www.libsdl.org. If you want to know what SDL is, please
+see the next topic. Cygne/SDL is the port for all Operating Systems which allows
+you to use the SDL library. Currently Cygne/SDL has been succesfully compiled
+on BeOS (Release 5), Linux (Debian 2.2r4), FreeBSD (4.4) and WIN32 systems
+using the GNU C/C++ (GCC) compiler, SDL 1.2.3 and zlib 1.3 library.
+
+Cygne/SDL is released as OpenSource under the GPL license. It uses code from the
+orignal Cygne (allthough a bit modified), code from the MAME NEC CPU core as
+well as portions from several SDLemu emulation projects. Anybody may hack the
+current sourcecode if they like or can make additional changes into it.
+
+Feel free to send contributions of your code to sdlemu@ngemu.com. The latest
+sources will become available on http://sdlemu.ngemu.com. A forum for Cygne/SDL 
+can be found on http://sdlemu.ngemu.com/phpBB2. A CVS server should come soon.
+
+2. What is SDL?
+
+The Simple Directmedia Layer library, or SDL for short, is a multimedia library
+designed for graphics (software, YUV Overlay, OpenGL), input handling, sound
+and other multimedia aspects. Currently it's available for several platforms
+like BeOS, Linux, FreeBSD, NetBSD, WIN32, PSX, etc. This means that most code
+which use SDL is highly portable and could compile on other platforms.
+
+For more information about SDL I should advice you to set your internet browser
+to the SDL website : http://www.libsdl.org.
+
+3. What is a Wonderswan?
+
+The Wonderswan and/or Wonderswan Colour is a handheld device manufactered by
+Bandai and is quite a hit in the land of the rising sun (read : Japan). Most
+games are developed in Japanese but a handfull are developed in the English
+language (allthough they are very hard to get). There are a bunch of games
+available but those are not widely available outside of Japan. You should 
+contact your local gamestore/consolestor which has import or use the internet 
+and browse around for getting the handheld and/or games, that's the best option
+to get a Wonderswan (Colour) or it's games.
+
+The original Wonderswan provided Monochrome graphics like the Nintendo's Gameboy
+but were more advanced. Somewhere in 2000/2001 Bandai released a Colour version
+of it's handheld which had Nintendo GBA like graphics and features. Nowadays
+games are hardly developed but sometimes a new one pops up. Especially the serie
+Final Fantasy has some very impressive graphics and sound which shows of the
+handheld.
+
+4. Enough allready, how can I use Cygne/SDL!!?!?!
+
+Ok, make sure you've got an OS with the GNU C/C++ compiler setup. We recommend
+version 2.95.2 or above (GCC 3.0 has *NOT* been tested!). 2nd, make sure you've
+setup SDL multimedia and the ZLIB compression library accordingly. If that's
+done, follow the instructions in the INSTALL file.
+
+Supported/Tested Operating Systems known to compile cleanly on:
+
+- BeOS R5 with updated GCC;
+- GNU/Linux with kernel 2.2.x or higher;
+- FreeBSD 4.x;
+- Win32 (All systems from Windows 95 supported)
+
+WIN32, to compile Cygne/SDL I would recommend the Cygwin or Mingw32 GCC compiler
+suite for WIN32 systems. Visual C++ is not yet supported but could work.
+
+After compilation you can simply run cygne from a commandline prompt. With the
+option 'cygne -h' you'll recieve a list with the switches supported. Normally
+you would do 'cygne romfile.wsc' to startup Cygne/SDL with the desired ROM 
+image. See the explanation in the next section for ROM images.
+
+5. ROM Images?
+
+Ok, for use with this emulator you need binary dumps of the original game-
+cartridges or Public Domain games/demo's. These binary dumps are called ROM's
+or ROM images. The use of ROM images is allowed as long as you own the orignal
+game. If not, this is a act of piracy which hurts the gaming/emulation community
+as well as the developers of Cygne and/or Cygne/SDL.
+
+Several authors have been developing Public Domain games and/or demo's to show
+off there programming skills. These ROM images are widely available on the
+internet. Using google you should find some to work with Cygne/SDL. The game
+WonderSnake is part of this source package (look in /WonderSnake) and was 
+originally part of the Cygne WIN32 distribution. So you can use Cygne/SDL right
+away :) For other Public Domain ROM images browse to http://www.pdroms.com.
+
+BTW, ROM images may be compressed with ZIP or GZIP compression. This is 
+supported and should work with out problems.
+
+When a game produces strange result, try setting the Cycles/Line to a new 
+setting using the 1 through 4 keys on your keyboard. See the next topic about
+keyboard layouts. Overall, most games should work but some might not work
+correctly or not at all! Keep in mind it's still emulation :)
+
+6. Keyboard settings
+
+To use the several ROM images you surely need to know how to control Cygne/SDL
+so it acts like a Wonderswan (Colour). Here are the keyboard settings, they
+are based upon Cygne's default keyboard layout :
+
+----------------------------------------------------------
+BANDAI WONDERSWAN (COLOUR) HANDHELD DEVICE LAYOUT
+----------------------------------------------------------
+    Y1  
+Y4      Y2
+    Y3
+
+
+    X1
+X4      X2     START   ROTATE      BUTTONB     BUTTONA
+    X3
+
+---------------------------------------------------------
+P.C. KEYBOARD -> ABOVE LAYOUT
+---------------------------------------------------------
+    W  
+A       D
+    S
+
+
+    UP
+LEFT  RIGHT    SPACE  TAB         X     Z
+   DOWN
+
+--------------------------------------------------------
+EXTRA KEYS
+--------------------------------------------------------
+F12 : Take screenshot
+1   : Cycles/line -> 391
+2   : Cycles/line -> 574
+3   : Cycles/line -> 837
+4   : Cycles/line -> 677
+
+7. Finding Bugs/Contributions?
+
+Did you find bugs or do you want to make contributions? Feel free to send them
+to sdlemu@ngemu.com so that they can be solved/implented in the next source
+release. Atm no CVS is running for Cygne/SDL but one is in the planning. 
+
+Anyone who has features, ideas to add to the SDL version should send them here 
+sdlemu@ngemu.com, full recognition will be given for any features added. 
+
+Bugs can also be submitted on the SDLemu forum : http://sdlemu.ngemu.com/phpBB2.
+
+8. Contact information.
+
+The latest version of Cygne/SDL will always be available at the SDLemu website.
+You can find it at http://sdlemu.ngemu.com. 
+
+Contacting us is the easiest using e-mail and by sending it to sdlemu@ngemu.com.
+The other way is using the forum (the link is provided at the SDLemu website).
+
+Possibly a CVS server as well as a mailinglist could arrive soon :)
+
+Lame messages like ROM requests or why doesn't game xxx run will not be 
+awnsered.
+
+9. Overall
+
+Have phun with this release!
