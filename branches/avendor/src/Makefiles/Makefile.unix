@@ -8,7 +8,7 @@ STDLIB     = /usr/lib
 SDLINCLUDE = /usr/local/include/SDL
 SDLLIB	   = /usr/local/lib
 
-CFLAGS = -O1 -DUNIX -DTARGET_UNIX -DGCC -DUSES_16BIT_ONLY -D__SDL__ -fomit-frame-pointer -march=pentium \
+CFLAGS = -g -O1 -DUNIX -DTARGET_UNIX -DGCC -DUSES_16BIT_ONLY -D__SDL__ -fomit-frame-pointer -march=pentium \
          -mpentium -finline-functions -fexpensive-optimizations -funroll-loops -funroll-all-loops -pipe \
          -fschedule-insns2 -fstrength-reduce -malign-double -mfancy-math-387 -ffast-math -fforce-addr \
          -fforce-mem `sdl-config --cflags` \
@@ -18,11 +18,11 @@ LDFLAGS = $(CFLAGS)
 
 TARGET = cygne
 
-OBJ = sdl/ddrawsdl.o sdl/filessdl.o sdl/mainsdl.o
-      gfx.o nec.o tcache.o memory.o 
+OBJ = sdl/ddrawsdl.o sdl/filessdl.o sdl/mainsdl.o sdl/getparamsdl.o \
+      gfx.o nec.o tcache.o memory.o \
       zlib/unzip.o
 
-LIBS = `sdl-config --libs` -lz
+LIBS = `sdl-config --libs` -lz -lstdc++
 
 all: $(TARGET)
 

@@ -9,6 +9,11 @@
  ===================================================================================
 */
 #ifdef __SDL__
+#ifdef __QNX__
+#define __GCC_BUILTIN
+#include <strings.h>
+#endif
+
 #include <string.h> // memset
 
 typedef unsigned long DWORD;

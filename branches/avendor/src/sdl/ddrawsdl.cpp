@@ -495,7 +495,7 @@ int start_dx_h(void)
 	g_pDDSPrimary = SDL_SetVideoMode(224 * fScreenSize, 144 * fScreenSize, 16, SDL_SWSURFACE);
 	memset(g_pDDSPrimary->pixels, 0, g_pDDSPrimary->pitch * g_pDDSPrimary->h);
 	
-	SDL_WM_SetCaption("Cygne", NULL);
+	SDL_WM_SetCaption("Cygne/SDL", NULL);
 	if(!g_pDDSPrimary) {
 		puts("error");
 		return 1;
@@ -548,9 +548,9 @@ int start_dx_v(void)
 	g_pDDSPrimary = SDL_SetVideoMode(144*fScreenSize, 224*fScreenSize, 16, SDL_SWSURFACE);
 	
 	memset(g_pDDSPrimary->pixels, 0, g_pDDSPrimary->pitch * g_pDDSPrimary->h);
-	SDL_WM_SetCaption("Cygne", NULL);
+	SDL_WM_SetCaption("Cygne/SDL", NULL);
 	if(!g_pDDSPrimary) {
-		puts("error");
+		puts("Error setting SDL framebuffer\n");
 		return 1;
 	}
 

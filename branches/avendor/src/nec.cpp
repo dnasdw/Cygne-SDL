@@ -24,12 +24,16 @@
 
 ****************************************************************************/
 
-
+#ifdef __QNX__
+#define __GCC_BUILTIN
+#endif
 #include <stdio.h>
 #include <string.h>
 #ifndef __SDL__
 #include <windows.h>
 #endif
+
+
 
 #define UINT8 BYTE
 #define UINT16 WORD
